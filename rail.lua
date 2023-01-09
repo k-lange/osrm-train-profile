@@ -18,11 +18,11 @@ function setup()
       max_angle                      = 30,
 
       secondary_speed                = 30,
-      speed                          = 130,
+      speed                          = 160,
     },
 
     default_mode              = mode.train,
-    default_speed             = 120,
+    default_speed             = 160,
 
 
     -- classes to support for exclude flags
@@ -35,7 +35,7 @@ function setup()
 end
 
 
-function ternary ( cond , T , F )
+function ternary(cond, T, F)
     if cond then return T else return F end
 end
 
@@ -106,9 +106,9 @@ function process_way(profile, way, result, relations)
         data.usage == "industrial"
     )
 
-    -- by default, use 30km/h for secondary rails, else 130
+    -- by default, use 30km/h for secondary rails, else 160
     local default_speed = ternary(is_secondary, profile.properties.secondary_speed, profile.properties.speed)
-    -- but is OSM specifies a maxspeed, use the one from OSM
+    -- but if OSM specifies a maxspeed, use the one from OSM
     local speed = ternary(data.maxspeed, data.maxspeed, default_speed)
 
    -- fix speed for mph issue
@@ -120,7 +120,7 @@ function process_way(profile, way, result, relations)
         if speed == nil then speed = 20 end
 	speed = speed * 1.609344
     else
-     speed = tonumber (speed)
+     speed = tonumber(speed)
     end
     -- fix speed for mph issue end
 
@@ -154,12 +154,9 @@ function process_way(profile, way, result, relations)
     -- TODO: it might be usefull to look at the relation name
     result.name = ternary(data.name, data.name, data.ref)
 
-    -- Slightly decrease the preference on highspeed rails to avoid them if possible
     if data.highspeed then
         result.forward_classes["highspeed"] = true
         result.backward_classes["highspeed"] = true
-        result.forward_rate = result.forward_rate - 0.2
-        result.backward_rate = result.backward_rate - 0.2
     end
 
     if data.is_secondary then
@@ -176,13 +173,13 @@ function process_way(profile, way, result, relations)
     end
 
     -- possible values for trafic_mode : freight, passenger or mixed
-    -- Slightly increase the preference on freight and slightly decrease it for passenger
+    -- Slightly decrese the preference on freight and slightly increase it for passenger
     if data.trafic_mode == "freight" then
-        result.forward_rate = result.forward_rate + 0.1
-        result.forward_rate = result.backward_rate + 0.1
-    elseif data.trafic_mode == "passenger" then
         result.forward_rate = result.forward_rate - 0.1
         result.forward_rate = result.backward_rate - 0.1
+    elseif data.trafic_mode == "passenger" then
+        result.forward_rate = result.forward_rate + 0.1
+        result.forward_rate = result.backward_rate + 0.1
     end
 
     -- Restrict secondary to be used only at start or end
@@ -194,7 +191,7 @@ end
 
 function process_turn(profile, turn)
     -- Refuse truns that have a big angle
-    if math.abs(turn.angle) >  profile.properties.max_angle then
+    if math.abs(turn.angle) > profile.properties.max_angle then
         return
     end
     -- If we have a turn with more than 2 roads (more than one way in, one way out)
