@@ -12,7 +12,7 @@ function setup()
       max_speed_for_map_matching     = 220/3.6, -- speed conversion to m/s
       weight_name                    = 'routability',
       left_hand_driving              = true,
-      u_turn_penalty                 = 60 * 2, -- 2 minutes to change cabin
+      u_turn_penalty                 = 60 * 6, -- typical turnaround time at a terminus
       turn_duration                  = 20,
       continue_straight_at_waypoint  = false,
       max_angle                      = 30,
