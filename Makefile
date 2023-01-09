@@ -19,7 +19,7 @@ output/filtered.osm.pbf: $(subst world,filtered,$(COUNTRIES_PBF))
 	osmium merge $^ -o $@ --overwrite
 
 # Compute the real OSRM data on the combined file
-output/filtered.osrm: output/filtered.osm.pbf freight.lua
+output/filtered.osrm: output/filtered.osm.pbf rail.lua
 	docker run -t -v $(shell pwd):/opt/host ghcr.io/project-osrm/osrm-backend osrm-extract -p /opt/host/rail.lua /opt/host/$<
 
 	docker run -t -v $(shell pwd):/opt/host ghcr.io/project-osrm/osrm-backend osrm-partition /opt/host/$<
@@ -27,5 +27,5 @@ output/filtered.osrm: output/filtered.osm.pbf freight.lua
 
 all: output/filtered.osrm
 
-serve: output/filtered.osrm freight.lua
+serve: output/filtered.osrm rail.lua
 	docker run -t -i -p 5055:5000 -v $(shell pwd):/opt/host ghcr.io/project-osrm/osrm-backend osrm-routed --algorithm mld /opt/host/$<
